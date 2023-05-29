@@ -1,6 +1,6 @@
 {
   "name": "evtsrc",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "dist/min/server.js",
   "browser": "./dist/min/web.js",
   "author": "JinhyeokLee <zenyr@zenyr.com> (https://zenyr.com)",
