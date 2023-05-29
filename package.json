@@ -1,14 +1,20 @@
 {
   "name": "evtsrc",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "author": "JinhyeokLee <jinhyuklee@mymusictaste.com>",
+  "main": "dist/min/server.js",
+  "browser": "./dist/min/web.js",
+  "author": "JinhyeokLee <zenyr@zenyr.com> (https://zenyr.com)",
   "license": "MIT",
   "scripts": {
     "dev": "rm -rf dist || true && swc src -d dist -w -s",
     "build": "rm -rf dist || true && swc src -d dist -s",
-    "pack": "spack"
+    "pack": "spack && tsc"
   },
+  "keywords": [
+    "EventSource",
+    "SSE",
+    "Server-Sent Events"
+  ],
   "files": [
     "dist"
   ],
