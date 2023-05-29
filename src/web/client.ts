@@ -1,5 +1,6 @@
 // This file assumes that EventSource is globally available.
 import { EOS_DEFAULT } from "../type";
+
 export class EvtSrcClient<T = unknown, EOS = EOS_DEFAULT> extends EventSource {
   private _lastMessage: T | null = null;
   private _eosMarker: string;
@@ -22,7 +23,7 @@ export class EvtSrcClient<T = unknown, EOS = EOS_DEFAULT> extends EventSource {
       const resolve = () => (
         clear(), res(this.readyState === EventSource.OPEN)
       );
-      const reject = () => (clear(), rej());
+      const reject = () => (clear(), rej(new Error("Connection Error")));
       const clear = () => {
         this.removeEventListener("open", resolve);
         this.removeEventListener("error", reject);
@@ -78,7 +79,9 @@ export class EvtSrcClient<T = unknown, EOS = EOS_DEFAULT> extends EventSource {
 
         return clear(), (this._lastMessage = message), res(message);
       };
-      const reject = () => (clear(), rej());
+      const reject = () => (
+        clear(), rej(new Error(`EventSource(${eventName}) error`))
+      );
       const clear = () => {
         this.removeEventListener(eventName, resolve);
         this.removeEventListener("error", reject);
@@ -92,7 +95,7 @@ export class EvtSrcClient<T = unknown, EOS = EOS_DEFAULT> extends EventSource {
 
   close(): void {
     try {
-      this.dispatchEvent(new Event("close"));
+      this.dispatchEvent(new MessageEvent("close"));
     } catch {
       // ignore
     }

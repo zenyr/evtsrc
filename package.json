@@ -30,6 +30,7 @@
     "@vitest/coverage-c8": "^0.31.1",
     "chokidar": "^3.5.3",
     "eventsourcemock": "^2.0.0",
+    "jsdom": "^22.1.0",
     "typescript": "^5.0.4",
     "vitest": "^0.31.1"
   }

@@ -67,6 +67,12 @@ describe("heartbeat", () => {
 });
 
 describe("asJson / weird inputs", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   it("should reject json input", () => {
     const evtsrc = new EvtSrcServer({ eosMarker: EOS });
     expect(() => evtsrc.emitMessage({ data: { hi: "there" } })).toThrow();
@@ -80,11 +86,11 @@ describe("asJson / weird inputs", () => {
     expect(() => evtsrc.emitMessage({})).toThrow();
   });
   it("should reject promise after closed", async () => {
-    const evtsrc = new EvtSrcServer({heartbeat: 1000, eosMarker: EOS });
+    const evtsrc = new EvtSrcServer({ heartbeat: 1000, eosMarker: EOS });
     const spy = vi.spyOn(evtsrc, "emitComment");
     evtsrc.close();
     await expect(evtsrc.messagePromise).rejects.toThrow();
     vi.advanceTimersByTime(3500);
-    expect(spy).toBeCalledTimes(0); 
+    expect(spy).toBeCalledTimes(0);
   });
 });

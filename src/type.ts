@@ -4,4 +4,4 @@ export type Chunk<T> = {
   comment?: string;
 };
 
-export type EOS_DEFAULT = { data: "done" };
+export type EOS_DEFAULT = { data: string };
