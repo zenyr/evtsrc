@@ -72,3 +72,15 @@ import { EvtSrcServer } from "evtsrc";
 
 - Feel free to suggest me an idea. Github messages are not the best way to contact me though... (too much noise ratio)
 
+# Changelog
+
+### 1.1.0
+
+    - Client
+        - Support `event: ` case
+        - Support EOS marker
+    - Server
+        - Skip heartbeat with falsy value
+
+
+### 1.0.0 : Initial publish

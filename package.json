@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "rm -rf dist || true && swc src -d dist -w -s",
     "build": "rm -rf dist || true && swc src -d dist -s",
-    "pack": "spack && tsc"
+    "pack": "rm -rf dist || true && spack && tsc"
   },
   "keywords": [
     "EventSource",
