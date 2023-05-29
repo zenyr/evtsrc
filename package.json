@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "rm -rf dist || true && swc src -d dist -w -s",
     "build": "rm -rf dist || true && swc src -d dist -s",
+    "test": "vitest",
+    "coverage": "vitest --coverage",
     "pack": "rm -rf dist || true && spack && tsc"
   },
   "repository": {
@@ -25,7 +27,10 @@
   "devDependencies": {
     "@swc/cli": "^0.1.62",
     "@swc/core": "^1.3.60",
+    "@vitest/coverage-c8": "^0.31.1",
     "chokidar": "^3.5.3",
-    "typescript": "^5.0.4"
+    "eventsourcemock": "^2.0.0",
+    "typescript": "^5.0.4",
+    "vitest": "^0.31.1"
   }
 }

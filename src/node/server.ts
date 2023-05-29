@@ -12,13 +12,15 @@ export class EvtSrcServer<
   constructor(
     private options: { asJson?: boolean; heartbeat?: number; eosMarker: EOS }
   ) {
-    Object.assign(this.options, { asJson: false, heartbeat: 0 }, options);
+    const _options = Object.assign({ asJson: false, heartbeat: 0 }, options);
+    this.options = _options;
+
     this.emitter.addListener("queue_message", this.processQueue);
     if (!this.options.eosMarker.data)
       throw new Error("Invalid EOS marker: no data.");
     if (this.options.heartbeat) {
       this._tmr = setInterval(
-        () => !this._dead && this.emitComment(` - Heartbeat: ${Date.now()} - `),
+        this.heartbeat.bind(this),
         this.options.heartbeat
       );
     }
@@ -36,7 +38,7 @@ export class EvtSrcServer<
 
     const { data } = chunk;
     const { asJson } = this.options;
-    if (!asJson && typeof data !== "string") {
+    if (data && !asJson && typeof data !== "string") {
       throw new Error(
         "Invalid data type: data must be a string or options.asJson must be enabled."
       );
@@ -60,7 +62,7 @@ export class EvtSrcServer<
    *
    * @param {Chunk<T> | EOS} chunk - The message to process.
    */
-  private processQueue(chunk: Chunk<T> | EOS) {
+  private processQueue = (chunk: Chunk<T> | EOS) => {
     const message = [] as string[];
     if (chunk.comment) message.push(`:${chunk.comment.replace(/\n/g, "\n:")}`);
     if (chunk.eventName) {
@@ -78,7 +80,7 @@ export class EvtSrcServer<
     if (!message.length) return;
 
     this.emitter.emit("message", message.join("\n") + "\n\n");
-  }
+  };
 
   /**
    * Returns a Promise that resolves with the next message event data.
@@ -87,7 +89,7 @@ export class EvtSrcServer<
    * @returns {Promise<string>} A Promise that resolves with the data of the next message event.
    */
   get messagePromise(): Promise<string> {
-    if (this._dead) return Promise.reject();
+    if (this._dead) return Promise.reject(new Error("Connection closed."));
     const p = new Promise<string>((res, rej) => {
       const resolve = (e: string) => (clear(), res(e));
       const reject = () => (clear(), rej());
@@ -101,6 +103,10 @@ export class EvtSrcServer<
     });
     this.promises.add(p);
     return p;
+  }
+
+  private heartbeat() {
+    !this._dead && this.emitComment(` - Heartbeat: ${Date.now()} - `);
   }
 
   /**
