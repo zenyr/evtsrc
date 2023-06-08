@@ -21,16 +21,42 @@ import { EvtSrcClient } from "evtsrc";
 // same usage as EventSource but with a few added methods:
 // 1. Awaits until connection state changes
 // get connectionChangePromise(): Promise<void>;
+//
 // 2. Waits for a new message to arrive
 // get messageChangePromise(): Promise<T>;
+//
 // 3. Returns immediately if connected, otherwise await
 // get connectionPromise(): Promise<void>;
+//
 // 4. Returns any messages(might be stale) arrived, otherwise await
 // get messagePromise(): Promise<T>;
 //
-// All promises may reject on bad conditions like when server intentionally disconnects a SSE source. Please catch them accordingly ;)
+// All promises may reject due to unfavorable conditions, 
+// such as when the server intentionally disconnects an SSE source.
+// Please handle these rejections appropriately. ;)
 
-// Todo: better demo code here
+// Create an instance of EvtSrcClient
+const client = new EvtSrcClient<string>("https://example.com/stream", {
+  eosMarker: "END_OF_STREAM", // match with Server
+});
+
+// Wait for the connection to open
+await client.connectionPromise;
+
+// Infinite loop to receive messages
+while (true) {
+  const message = await client.messagePromise;
+  console.log("Received message:", message);
+
+  // Check for the eosMarker
+  if (message === "END_OF_STREAM") {
+    console.log("End of stream reached. Closing connection.");
+    break;
+  }
+}
+
+// Close the connection
+client.close();
 ```
 
 ## 2. Node.js environment
@@ -56,8 +82,62 @@ import { EvtSrcServer } from "evtsrc";
 // get messagePromise(): Promise<string>;
 //
 // close(): Promise<void>;
-//
-// Todo: Better demo code here
+
+// Example with express
+import express, { Request, Response } from 'express';
+import { EvtSrcServer, Chunk } from './EvtSrcServer'; // Assuming the EvtSrcServer code is in a separate file
+
+const app = express();
+
+app.get('/event-stream', async (req: Request, res: Response) => {
+  // Instantiate EvtSrcServer (match eosMarker with Client)
+  const evtsrc = new EvtSrcServer<string>({ eosMarker: { data: 'END_OF_STREAM' } }); 
+
+  // Send appropriate headers and flush response
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  try {
+    // Call yourAwesomeFunction with evtsrc
+    yourAwesomeFunction(evtsrc); // branch out your logic here and begin the loop
+
+    // Infinite loop to send messages as they arrive
+    while (true) {
+      try {
+        const message = await evtsrc.messagePromise;
+        res.write(message); // Send the formatted message to the response
+      } catch (error) {
+        if(!error) {
+          // evtsrc.close() was called in yourAwesomeFunction
+        } 
+        break; // Break the loop and safely close the response
+      }
+    }
+  } finally {
+    // Close the response and end the connection
+    res.end();
+  }
+});
+
+// Function that demonstrates a long-lasting async call
+async function yourAwesomeFunction(evtsrc: EvtSrcServer<string>) {
+  try {
+    // Simulate a long-running task with progress updates
+    for (let i = 1; i <= 10; i++) {
+      await delay(1000); // Delay for 1 second (replace with your actual task logic)
+      
+      // Send progress update as a message
+      evtsrc.emitMessage({ data: `Progress: ${i * 10}%` });
+    }
+
+    // Task completed
+    evtsrc.emitMessage({ data: 'Task completed!', eventName: 'taskComplete' });
+  } finally {
+    evtsrc.close();
+  }
+}
 ```
 
 ## Why?
