@@ -1,8 +1,23 @@
 {
   "name": "evtsrc",
-  "version": "1.1.1",
-  "main": "dist/min/server.js",
-  "browser": "./dist/min/web.js",
+  "version": "1.1.2",
+  "main": "./dist/cjs/server.js",
+  "module": "./dist/esm/server.mjs",
+  "browser": "./dist/esm/web.mjs",
+  "exports": {
+    ".": {
+      "node": {
+        "default": "./dist/cjs/server.js",
+        "import": "./dist/esm/server.mjs",
+        "types": "./dist/ts/server.d.ts"
+      },
+      "browser": {
+        "default": "./dist/cjs/web.js",
+        "import": "./dist/esm/web.mjs",
+        "types": "./dist/web.d.ts"
+      }
+    }
+  },
   "author": "JinhyeokLee <zenyr@zenyr.com> (https://zenyr.com)",
   "license": "MIT",
   "scripts": {
@@ -10,7 +25,7 @@
     "build": "rm -rf dist || true && swc src -d dist -s",
     "test": "vitest",
     "coverage": "vitest --coverage",
-    "pack": "rm -rf dist || true && spack && tsc"
+    "pack": "rm -rf dist || true && spack && babel dist/esm --out-dir dist/cjs && tsc"
   },
   "repository": {
     "type": "git",
@@ -25,6 +40,9 @@
     "dist"
   ],
   "devDependencies": {
+    "@babel/cli": "^7.22.5",
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
     "@swc/cli": "^0.1.62",
     "@swc/core": "^1.3.60",
     "@vitest/coverage-c8": "^0.31.1",
